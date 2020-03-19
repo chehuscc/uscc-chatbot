@@ -1,3 +1,13 @@
+# Start with a builder image containing Maven and JDK 1.8
+FROM diamol/maven AS builder
+
+WORKDIR /usr/src/iotd
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+
+COPY . .
+RUN mvn package
+
 # Start with a base image containing Java runtime
 FROM openjdk:8-jdk-alpine
 
