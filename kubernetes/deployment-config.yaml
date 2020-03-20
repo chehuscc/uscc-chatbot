@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: uscc-chatbot
+  name: uscc-chatbot
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: uscc-chatbot
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: uscc-chatbot
+    spec:
+      containers:
+        - image: gcr.io/uscctestbot/github.com/chehuscc/uscc-chatbot
+          imagePullPolicy: IfNotPresent
+          name: github-chehuscc-uscc-chatbot-1
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: uscc-chatbot
+  name: uscc-chatbot-hpa-ocvt
+  namespace: default
+spec:
+  maxReplicas: 5
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageUtilization: 80
+      type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: uscc-chatbot
